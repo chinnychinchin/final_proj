@@ -1,5 +1,7 @@
 import { Component, OnInit } from '@angular/core';
+import { Router } from '@angular/router';
 import { AuthService } from '../auth.service';
+import { AngularSvgIconModule } from 'angular-svg-icon'
 
 @Component({
   selector: 'app-login',
@@ -8,14 +10,13 @@ import { AuthService } from '../auth.service';
 })
 export class LoginComponent implements OnInit {
 
-  constructor(private authSvc: AuthService) { }
+  constructor(private authSvc: AuthService, private router: Router) { }
 
   ngOnInit(): void {
   }
 
-  async signIn() {
+  signIn() {
     this.authSvc.signInWithGoogle()
-    
   }
 
 }

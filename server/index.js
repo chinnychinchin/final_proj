@@ -7,6 +7,7 @@ const jwt = require('jsonwebtoken');
 const GoogleStrategy = require( 'passport-google-oauth2' ).Strategy;
 const mysql2 = require('mysql2/promise');
 require('dotenv').config();
+const fetch = require('node-fetch');
 
 //Configure port 
 const PORT = parseInt(process.argv[2]) || parseInt(process.env.PORT) || 3000;
@@ -59,7 +60,7 @@ passport.use(new GoogleStrategy({
         const [authResult,_] = await conn.query(SQL_FIND_USER, [profile.id])
         //if auth is correct, authResult.length == 1, then !!authResult.length == true
         if (!!authResult.length) {
-            done(null, {
+            done(null, {   
                 //passport will generate a user object as below as req.user
                 googleId: profile.id,
                 loginTime: (new Date()).toString(),
@@ -146,4 +147,41 @@ app.get('/auth/google/callback', passport.authenticate('google'), (req,res) => {
     //res.status(200).type('application/json').json({"message": "User logged in", token})
 
 });
+
+app.get('/main', (req, res) => {
+
+    res.status(200).type('application/json').json({"page": "main page"})
+
+})
+
+//Analyze article + store analysis in MongoDb
+app.post('/api/analyze', (req, res, next) => {
+
+    //check if request has authorization header
+    const token = req.get('Authorization');
+    if (null == token) {
+        res.status(403).json({"message": "Missing Authorization header"})
+    }
+    try{
+        //verify token
+        const verified = jwt.verify(token, TOKEN_SECRET);
+        //console.info(`Verified token: `, verified);
+        next();
+    } catch(e) {
+        res.status(403).json({message: 'Incorrect token', e})
+    }
+
+}, async (req, res) => {
+
+    const article = req.body
+    //post to fakebox end point and upload results to mongo
+    const result = await fetch('http://localhost:8080/fakebox/check', {method: 'post', body: JSON.stringify(article), headers: { 'Content-Type': 'application/json' }})
+    const resultJson = await result.json()
+    console.log(resultJson)
+    res.status(200).json(resultJson)
+
+
+}
+
+)
 
