@@ -88,8 +88,8 @@ passport.use(new GoogleStrategy({
 const app = express();
 
 //configure express
-app.use(morgan('combined'));
 app.use(cors());
+app.use(morgan('combined'));
 app.use(express.json());
 app.use(express.urlencoded({extended: true}));
 
@@ -121,7 +121,8 @@ passport.deserializeUser(async (id, done) => {
 app.get('/auth/google',
   passport.authenticate('google', { scope:
       [ 'email', 'profile' ] }
-));
+  )
+);
 
 //After the user clicks allow
 app.get('/auth/google/callback', passport.authenticate('google'), (req,res) => {
@@ -136,7 +137,13 @@ app.get('/auth/google/callback', passport.authenticate('google'), (req,res) => {
         exp: issuedTimeInSeconds + (60*60)  //token expires 30s after being issued
 
     }, TOKEN_SECRET)
-
-    res.status(200).type('application/json').json({"message": "User logged in", token})
+    let responseHTML = '<html><head><title>Main</title></head><body></body><script>res = %value%; window.opener.postMessage(res, "*");window.close();</script></html>'
+    responseHTML = responseHTML.replace('%value%', JSON.stringify({
+        user: req.user,
+        token
+    }))
+    res.status(200).send(responseHTML);
+    //res.status(200).type('application/json').json({"message": "User logged in", token})
 
 });
+
