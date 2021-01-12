@@ -8,16 +8,25 @@ const GoogleStrategy = require( 'passport-google-oauth2' ).Strategy;
 const mysql2 = require('mysql2/promise');
 require('dotenv').config();
 const fetch = require('node-fetch');
+const { MongoClient, Timestamp } = require('mongodb');
 
 //Configure port 
 const PORT = parseInt(process.argv[2]) || parseInt(process.env.PORT) || 3000;
+
+//Configure Mongodb
+const MONGO_URL = "mongodb://localhost:27017";
+const mongoClient = new MongoClient(MONGO_URL, {useNewUrlParser: true, useUnifiedTopology: true});
+const MONGO_DB = 'veracity';
+const MONGO_COL = 'articles';
 
 //Jwt password
 const TOKEN_SECRET = process.env.TOKEN_SECRET
 
 //SQL queries
 const SQL_FIND_USER = "select googleId from veracity_users where googleId = ?";
-const SQL_INSERT_USER = "insert into veracity_users values (?)";
+const SQL_INSERT_USER = "insert into veracity_users values (?, ?)";
+const SQL_INSERT_ARTICLE = "insert into articles (url, title, content, googleId) values (?,?,?,?)";
+const SQL_GET_ARTICLES_BY_ID = "select * from articles where googleId = ?";
 
 //configure mysql pool
 const pool = mysql2.createPool({
@@ -32,16 +41,21 @@ const pool = mysql2.createPool({
 
 });
 
-//start app 
-pool.getConnection().then(async conn => {
+//start app
+const p0 = pool.getConnection();
+const p1 = mongoClient.connect();
 
+Promise.all([p0,p1]).then(async result => {
+
+    const conn = result[0];
     await conn.ping();
     console.log(">>> Pinging databse...");
     app.listen(PORT, () => {
         console.log(`App started on port ${PORT} at ${new Date()}`)
     })
     conn.release()
-}).catch(e => {console.log("Unable to connect to database. App not started.", e)})
+
+}).catch(e => {console.log("Unable to connect to databases. App not started.", e)})
 
 
 
@@ -69,7 +83,7 @@ passport.use(new GoogleStrategy({
      
         }else{
             //create a new user in the mysql database with the corresponding google_id
-            await conn.query(SQL_INSERT_USER, [profile.id])
+            await conn.query(SQL_INSERT_USER, [profile.id, profile.email])
             done(null, {
                 //passport will generate a user object as below as req.user
                 googleId: profile.id,
@@ -165,6 +179,7 @@ app.post('/api/analyze', (req, res, next) => {
     try{
         //verify token
         const verified = jwt.verify(token, TOKEN_SECRET);
+        req.googleId = verified.sub;
         //console.info(`Verified token: `, verified);
         next();
     } catch(e) {
@@ -173,14 +188,72 @@ app.post('/api/analyze', (req, res, next) => {
 
 }, async (req, res) => {
 
-    const article = req.body
+    const article = req.body;
+    console.log(article)
+    const conn = await pool.getConnection();
     //post to fakebox end point and upload results to mongo
-    const result = await fetch('http://chinsfakebox.eastus.azurecontainer.io:8080/fakebox/check', {method: 'post', body: JSON.stringify(article), headers: { 'Content-Type': 'application/json' }})
-    const resultJson = await result.json()
-    console.log(resultJson)
-    res.status(200).json(resultJson)
+    try{
+        await conn.beginTransaction()
+        //Insert article into MySql
+        const [sqlReturn, _] = await conn.query(SQL_INSERT_ARTICLE, [article.url, article.title, article.content, req.googleId])
+        //Perform Analysis
+        const result = await fetch('http://chinsfakebox.eastus.azurecontainer.io:8080/fakebox/check', {method: 'post', body: JSON.stringify(article), headers: { 'Content-Type': 'application/json' }})
+        const resultJson = await result.json()
+        //Insert analysis results into MongoDb
+        await mongoClient.db(MONGO_DB).collection(MONGO_COL).insertOne({
+            _id: sqlReturn.insertId,
+            analysis: resultJson,
+            timestamp: new Timestamp()
+        })
+        await conn.commit();
+        res.status(200).json(resultJson);
+
+    } catch(e){
+        conn.rollback()
+        res.status(500).type('application/json').json({e})
+    } finally{ conn.release() }
+    
 
 
+}
+
+)
+
+
+//Get search history route
+app.get('/api/history', (req, res, next) => {
+
+    //check if request has authorization header
+    const token = req.get('Authorization');
+    if (null == token) {
+        res.status(403).json({"message": "Missing Authorization header"})
+    }
+    try{
+        //verify token
+        const verified = jwt.verify(token, TOKEN_SECRET);
+        req.googleId = verified.sub;
+        //console.info(`Verified token: `, verified);
+        next();
+    } catch(e) {
+        res.status(403).json({message: 'Incorrect token', e})
+    }
+
+}, async (req, res) => {
+
+    // mongoClient.db(MONGO_DB).collection(MONGO_COL)
+    //     .find({user: req.googleId}).toArray()
+    //     .then(result => {res.status(200).type('application/json').json(result)})
+    //     .catch(err => {res.status(500).type('application/json').json(err)})
+    
+    //Get articles from MySql
+    const conn = await pool.getConnection();
+    try{
+        const [articles,_] = await conn.query(SQL_GET_ARTICLES_BY_ID, [req.googleId]);
+        res.status(200).type('application/json').json(articles)
+
+    } catch(err) {
+        res.status(500).type('application/json').json({err, "message": "unable to retrieve articles from MySql db"})
+    }
 }
 
 )

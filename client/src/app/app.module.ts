@@ -10,13 +10,15 @@ import { AuthService } from './auth.service';
 import { AppComponent } from './app.component';
 import { LoginComponent } from './components/login.component';
 import { MainComponent } from './components/main.component';
+import { HistoryComponent } from './components/history.component';
 
 
 const ROUTES: Routes = [
 
   {path: '', component: LoginComponent},
-  {path: 'main', component: MainComponent, canActivate: [AuthService]}, 
-  {path: '**', redirectTo: '/', pathMatch: 'full'}
+  {path: 'main', component: MainComponent, canActivate: [AuthService]},
+  {path: 'history', component: HistoryComponent, canActivate: [AuthService]},  
+  {path: '**', redirectTo: '/main', pathMatch: 'full'}
 
 ]
 
@@ -25,6 +27,7 @@ const ROUTES: Routes = [
     AppComponent,
     LoginComponent,
     MainComponent,
+    HistoryComponent,
   ],
   imports: [
     BrowserModule,

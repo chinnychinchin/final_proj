@@ -35,11 +35,19 @@ export class AuthService implements CanActivate {
 
     }
 
+
+    getHistory(){
+
+        const headers = new HttpHeaders({"Authorization": this.token});
+        return this.http.get("http://localhost:3000/api/history", {headers}).toPromise()
+
+    }
+
     canActivate(route: ActivatedRouteSnapshot, state: RouterStateSnapshot) {
 
         if(this.isLogin())
             return true
-        return this.router.parseUrl('/')
+        return this.router.parseUrl('/') //route to navigate to in the event of an error
     }
 
 }

@@ -1,3 +1,19 @@
+<!-- Nav bar -->
+
+<nav class="navbar navbar-light" style="background-color: #e3f2fd;">
+    <a class="navbar-brand" href="#">Veracity</a>
+    <div class="navbar">
+      <div class="navbar-nav">
+        <a class="nav-item nav-link active" [routerLink]="['/main']">Home <span class="sr-only">(current)</span></a>
+        <a class="nav-item nav-link" [routerLink]="['/history']">History</a>
+        <a class="nav-item nav-link" href="#">Support</a>
+      </div>
+    </div>
+</nav>
+
+<br>
+<!-- Form -->
+
 <div class="row">
     <div class="col">
         <h3>To analyze  a news article, provide one of the following fields:</h3>
@@ -43,8 +59,10 @@
 
 <br><br>
 
+<!-- Analysis -->
+
 <div *ngIf="analysis != null">
-    <h4 style="margin-bottom: 5px;">Analysis</h4>
+    <h4 class="mb-3">Analysis</h4>
 
     <!-- Url analysis -->
     <div *ngIf="isNotEmpty.domain">
