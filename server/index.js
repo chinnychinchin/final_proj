@@ -175,7 +175,7 @@ app.post('/api/analyze', (req, res, next) => {
 
     const article = req.body
     //post to fakebox end point and upload results to mongo
-    const result = await fetch('http://localhost:8080/fakebox/check', {method: 'post', body: JSON.stringify(article), headers: { 'Content-Type': 'application/json' }})
+    const result = await fetch('http://chinsfakebox.eastus.azurecontainer.io:8080/fakebox/check', {method: 'post', body: JSON.stringify(article), headers: { 'Content-Type': 'application/json' }})
     const resultJson = await result.json()
     console.log(resultJson)
     res.status(200).json(resultJson)

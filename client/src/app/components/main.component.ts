@@ -11,6 +11,7 @@ export class MainComponent implements OnInit {
 
   newsArticleForm: FormGroup
   analysis
+  isNotEmpty = {domain: true, title: true, content: true}
   constructor(private fb: FormBuilder, private authSvc: AuthService) { }
 
   ngOnInit(): void {
@@ -25,11 +26,18 @@ export class MainComponent implements OnInit {
 
   }
 
+  checkIfEmpty(analysis){
+    this.isNotEmpty.domain = (Object.keys(analysis['domain']).length == 0) ? false : true;
+    this.isNotEmpty.title = (Object.keys(analysis['title']).length == 0) ? false : true;
+    this.isNotEmpty.content = (Object.keys(analysis['content']).find(x => x.toLowerCase() == 'score') == undefined) ? false : true;
+  }
 
   async onAnalyzeClick() {
 
     const article = this.newsArticleForm.value
     const {body} = await this.authSvc.analyzeArticle(article)
+    this.checkIfEmpty(body);
+    console.log(this.isNotEmpty)
     this.analysis = body
     console.log(this.analysis)
 
