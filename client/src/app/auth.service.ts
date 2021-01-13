@@ -55,8 +55,10 @@ export class AuthService implements CanActivate {
 
         const headers = new HttpHeaders({"Authorization": this.token});
         return this.http.delete(`http://localhost:3000/api/history/${id}`, {headers}).toPromise();
-        
+
     }
+
+
 
     canActivate(route: ActivatedRouteSnapshot, state: RouterStateSnapshot) {
 

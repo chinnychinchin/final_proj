@@ -12,6 +12,7 @@ import { LoginComponent } from './components/login.component';
 import { MainComponent } from './components/main.component';
 import { HistoryComponent } from './components/history.component';
 import { AnalHistComponent } from './components/anal-hist.component';
+import { SupportmeComponent } from './components/supportme.component';
 
 
 const ROUTES: Routes = [
@@ -19,7 +20,8 @@ const ROUTES: Routes = [
   {path: '', component: LoginComponent},
   {path: 'main', component: MainComponent, canActivate: [AuthService]},
   {path: 'history', component: HistoryComponent, canActivate: [AuthService]},
-  {path: 'history/:id', component: AnalHistComponent, canActivate: [AuthService]},    
+  {path: 'history/:id', component: AnalHistComponent, canActivate: [AuthService]},
+  {path: 'supportme', component: SupportmeComponent, canActivate: [AuthService]},
   {path: '**', redirectTo: '/main', pathMatch: 'full'}
 
 ]
@@ -31,6 +33,7 @@ const ROUTES: Routes = [
     MainComponent,
     HistoryComponent,
     AnalHistComponent,
+    SupportmeComponent,
   ],
   imports: [
     BrowserModule,

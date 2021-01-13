@@ -10,10 +10,6 @@ require('dotenv').config();
 const fetch = require('node-fetch');
 const { MongoClient, Timestamp } = require('mongodb');
 
-// Set up Stripe
-const Stripe = require('stripe');
-const stripe = Stripe('sk_test_51I93j1EjPt3kTNjOxuiugoadj5NJV6MZfcoat4DevPnjiqyW2ICaNF5hrho6bdNBC6XdKXWeu8W0gxq2GeIv04HN004yG5Afzk');
-
 //Configure port 
 const PORT = parseInt(process.argv[2]) || parseInt(process.env.PORT) || 3000;
 
@@ -99,7 +95,7 @@ passport.use(new GoogleStrategy({
         
     }
     catch(e){console.log(e)}
-    finally{conn.release()}
+    finally{ await conn.release()}
 
   }
 ));
@@ -131,7 +127,7 @@ passport.deserializeUser(async (id, done) => {
     catch(e){
         console.log(e)
     }
-    finally{conn.release()}
+    finally{ await conn.release()}
     
 });
 
@@ -219,7 +215,7 @@ app.post('/api/analyze', (req,res,next) => {checkToken(req,res,next)}, async (re
     } catch(e){
         conn.rollback()
         res.status(500).type('application/json').json({e})
-    } finally{ conn.release() }
+    } finally{ await conn.release() }
     
 }
 
@@ -276,41 +272,6 @@ app.get('/api/history/:id', (req,res,next) => {checkToken(req,res,next)}, async 
     } catch(e){
         conn.rollback()
         res.status(500).type('application/json').json({e})
-    } finally{ conn.release() }
+    } finally{ await conn.release() }
     
  })
-
-
-//Payment endpoint
-app.get('/success', (req, res) => {
-
-    res.status(200).type('html').send(`<h1>Success!</h1>`)
-})
-
-app.get('/failure', (req, res) => {
-
-    res.status(200).type('html').send(`<h1>Payment failed</h1>`)
-})
-
-
- app.post('/create-checkout-session', async (req, res) => {
-    const session = await stripe.checkout.sessions.create({
-      payment_method_types: ['card'],
-      line_items: [
-        {
-          price_data: {
-            currency: 'sgd',
-            product_data: {
-              name: 'Support developer',
-            },
-            unit_amount: 1,
-          },
-          quantity: 1,
-        },
-      ],
-      mode: 'payment',
-      success_url: `${YOUR_DOMAIN}/success.html`,
-      cancel_url: `${YOUR_DOMAIN}/cancel.html`,
-    });
-    res.json({ id: session.id });
-  });

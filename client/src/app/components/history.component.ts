@@ -15,7 +15,7 @@ export class HistoryComponent implements OnInit {
 
   ngOnInit(): void {
 
-    this.authSvc.getArticlesHistory().then(result => {console.log(result); this.articles = result}).catch(err => {console.log(err)})
+    this.authSvc.getArticlesHistory().then(result => {this.articles = result}).catch(err => {console.log(err)})
     
   }
 
