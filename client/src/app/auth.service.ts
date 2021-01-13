@@ -17,7 +17,7 @@ export class AuthService implements CanActivate {
             //message will contain google user and details
             this.token = message.data.token
             if(this.token != ''){
-                console.log(this.token)
+                //console.log(this.token)
                 this.router.navigate(['/main'])
             }  
         });
@@ -36,11 +36,26 @@ export class AuthService implements CanActivate {
     }
 
 
-    getHistory(){
+    getArticlesHistory(){
 
         const headers = new HttpHeaders({"Authorization": this.token});
         return this.http.get("http://localhost:3000/api/history", {headers}).toPromise()
 
+    }
+
+
+    getAnalysisHistory(id){
+        
+        const headers = new HttpHeaders({"Authorization": this.token});
+        return this.http.get(`http://localhost:3000/api/history/${id}`, {headers}).toPromise()
+
+    }
+
+    deleteArticle(id){
+
+        const headers = new HttpHeaders({"Authorization": this.token});
+        return this.http.delete(`http://localhost:3000/api/history/${id}`, {headers}).toPromise();
+        
     }
 
     canActivate(route: ActivatedRouteSnapshot, state: RouterStateSnapshot) {

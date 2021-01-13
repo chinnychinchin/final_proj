@@ -1,3 +1,22 @@
+<!-- Nav bar -->
+<nav class="navbar navbar-light" style="background-color: #e3f2fd;">
+  <span class="navbar-brand mb-0 h1">Veracity</span>
+  <div class="navbar">
+    <div class="nav">
+      <a class="nav-item nav-link active" [routerLink]="['/main']">Analyze <span class="sr-only">(current)</span></a>
+      
+    </div>
+    <div class="nav">
+      <a class="nav-item nav-link" [routerLink]="['/history']">My history</a>
+    </div>
+    <div class="nav">
+      <a class="nav-item nav-link">Support</a>
+    </div>
+  </div>
+</nav>
+
+<br>
+
 <div *ngIf="articles !== undefined">
     <div *ngIf="articles.length == 0">
         <h5>You have no search history</h5>
@@ -5,14 +24,16 @@
     
     <div *ngIf="articles.length !== 0">
         <div *ngFor="let a of articles" class="list-group mb-3">
-            <a href="#" class="list-group-item list-group-item-action active">
+            <a [routerLink]="['/history', a.id]" class="list-group-item list-group-item-action">
               <div class="d-flex w-100 justify-content-between">
-                <h5 class="mb-1">{{a.title}}</h5>
+                <h5 class="mb-3"><strong>Title: </strong>{{a.title}}</h5> 
                 <small>3 days ago</small>
               </div>
-              <p class="mb-1">Donec id elit non mi porta gravida at eget metus. Maecenas sed diam eget risus varius blandit.</p>
-              <small>Donec id elit non mi porta.</small>
+              <p class="mb-3"><strong>URL: </strong>{{a.url}}</p>
+              <p class="mb-1"><strong>Content: </strong>{{a.content}}</p>
+              <!-- <small>Donec id elit non mi porta.</small> -->
             </a>
+            <button type="button" class="btn btn-outline-danger btn-sm" (click)="onDelete(a.id)">Delete</button>
         </div>
     </div>
 </div>

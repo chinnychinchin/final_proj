@@ -1,15 +1,19 @@
 <!-- Nav bar -->
-
 <nav class="navbar navbar-light" style="background-color: #e3f2fd;">
-    <a class="navbar-brand" href="#">Veracity</a>
+    <span class="navbar-brand mb-0 h1">Veracity</span>
     <div class="navbar">
-      <div class="navbar-nav">
-        <a class="nav-item nav-link active" [routerLink]="['/main']">Home <span class="sr-only">(current)</span></a>
-        <a class="nav-item nav-link" [routerLink]="['/history']">History</a>
-        <a class="nav-item nav-link" href="#">Support</a>
+      <div class="nav">
+        <a class="nav-item nav-link active" [routerLink]="['/main']">Analyze <span class="sr-only">(current)</span></a>
+        
+      </div>
+      <div class="nav">
+        <a class="nav-item nav-link" [routerLink]="['/history']">My history</a>
+      </div>
+      <div class="nav">
+        <a class="nav-item nav-link">Support</a>
       </div>
     </div>
-</nav>
+  </nav>
 
 <br>
 <!-- Form -->
@@ -52,6 +56,9 @@
         </div>
         <div class="col">
             <button type="button" class="btn btn-light" (click)="onResetClick()">Reset</button>
+        </div>
+        <div class="col">
+            <button type="button" class="btn btn-info" (click)="share()" [disabled]="analysis == null || !canShare"><strong>Share with analysis</strong></button>
         </div>
     </div>
     

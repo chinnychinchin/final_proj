@@ -25,6 +25,7 @@
     "angular-svg-icon": "^11.0.0",
     "bootstrap": "^4.5.3",
     "jquery": "^3.5.1",
+    "ng-navigator-share": "^1.0.4",
     "rxjs": "~6.6.0",
     "tslib": "^2.0.0",
     "zone.js": "~0.10.2"

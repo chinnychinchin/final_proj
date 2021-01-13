@@ -17,7 +17,7 @@ const PORT = parseInt(process.argv[2]) || parseInt(process.env.PORT) || 3000;
 const MONGO_URL = "mongodb://localhost:27017";
 const mongoClient = new MongoClient(MONGO_URL, {useNewUrlParser: true, useUnifiedTopology: true});
 const MONGO_DB = 'veracity';
-const MONGO_COL = 'articles';
+const MONGO_COL = 'analyses';
 
 //Jwt password
 const TOKEN_SECRET = process.env.TOKEN_SECRET
@@ -26,7 +26,8 @@ const TOKEN_SECRET = process.env.TOKEN_SECRET
 const SQL_FIND_USER = "select googleId from veracity_users where googleId = ?";
 const SQL_INSERT_USER = "insert into veracity_users values (?, ?)";
 const SQL_INSERT_ARTICLE = "insert into articles (url, title, content, googleId) values (?,?,?,?)";
-const SQL_GET_ARTICLES_BY_ID = "select * from articles where googleId = ?";
+const SQL_GET_ARTICLES_BY_GOOGLEID = "select * from articles where googleId = ?";
+const SQL_DELETE_ARTICLE_BY_ID = "delete from articles where id = ?"; 
 
 //configure mysql pool
 const pool = mysql2.createPool({
@@ -35,7 +36,7 @@ const pool = mysql2.createPool({
     user: process.env.DB_USER, 
     password: process.env.DB_PASSWORD,
     database: process.env.DB_NAME || "paf2020",
-    connectionLimit: 4,
+    connectionLimit: 12,
     timezone: "+08:00",
     host: process.env.DB_HOST || "localhost"
 
@@ -130,6 +131,26 @@ passport.deserializeUser(async (id, done) => {
     
 });
 
+//Check token middleware
+const checkToken = (req, res, next) => {
+
+    //check if request has authorization header
+    const token = req.get('Authorization');
+    if (null == token) {
+        res.status(403).json({"message": "Missing Authorization header"})
+    }
+    try{
+        //verify token
+        const verified = jwt.verify(token, TOKEN_SECRET);
+        req.googleId = verified.sub;
+        //console.info(`Verified token: `, verified);
+        next();
+    } catch(e) {
+        res.status(403).json({message: 'Incorrect token', e})
+    }
+
+}
+
 //Configure routes 
 
 //login route
@@ -169,24 +190,7 @@ app.get('/main', (req, res) => {
 })
 
 //Analyze article + store analysis in MongoDb
-app.post('/api/analyze', (req, res, next) => {
-
-    //check if request has authorization header
-    const token = req.get('Authorization');
-    if (null == token) {
-        res.status(403).json({"message": "Missing Authorization header"})
-    }
-    try{
-        //verify token
-        const verified = jwt.verify(token, TOKEN_SECRET);
-        req.googleId = verified.sub;
-        //console.info(`Verified token: `, verified);
-        next();
-    } catch(e) {
-        res.status(403).json({message: 'Incorrect token', e})
-    }
-
-}, async (req, res) => {
+app.post('/api/analyze', (req,res,next) => {checkToken(req,res,next)}, async (req, res) => {
 
     const article = req.body;
     console.log(article)
@@ -213,32 +217,12 @@ app.post('/api/analyze', (req, res, next) => {
         res.status(500).type('application/json').json({e})
     } finally{ conn.release() }
     
-
-
 }
 
 )
 
-
 //Get search history route
-app.get('/api/history', (req, res, next) => {
-
-    //check if request has authorization header
-    const token = req.get('Authorization');
-    if (null == token) {
-        res.status(403).json({"message": "Missing Authorization header"})
-    }
-    try{
-        //verify token
-        const verified = jwt.verify(token, TOKEN_SECRET);
-        req.googleId = verified.sub;
-        //console.info(`Verified token: `, verified);
-        next();
-    } catch(e) {
-        res.status(403).json({message: 'Incorrect token', e})
-    }
-
-}, async (req, res) => {
+app.get('/api/history', (req,res,next) => {checkToken(req,res,next)}, async (req, res) => {
 
     // mongoClient.db(MONGO_DB).collection(MONGO_COL)
     //     .find({user: req.googleId}).toArray()
@@ -248,7 +232,7 @@ app.get('/api/history', (req, res, next) => {
     //Get articles from MySql
     const conn = await pool.getConnection();
     try{
-        const [articles,_] = await conn.query(SQL_GET_ARTICLES_BY_ID, [req.googleId]);
+        const [articles,_] = await conn.query(SQL_GET_ARTICLES_BY_GOOGLEID, [req.googleId]);
         res.status(200).type('application/json').json(articles)
 
     } catch(err) {
@@ -258,3 +242,36 @@ app.get('/api/history', (req, res, next) => {
 
 )
 
+//Get article analysis by id
+app.get('/api/history/:id', (req,res,next) => {checkToken(req,res,next)}, async (req, res) => {
+
+    const id = parseInt(req.params.id);
+    try{
+
+        const analysisResult = await mongoClient.db(MONGO_DB).collection(MONGO_COL).findOne({_id: id});
+        res.status(200).type('application/json').json(analysisResult)
+
+    } catch(err){
+        res.status(500).type('application/json').json({err, "message": "unable to retrieve articles from MongoDb"})
+    }
+
+ } )
+
+ app.delete('/api/history/:id', (req,res,next) => {checkToken(req,res,next)}, async (req, res) => {
+
+    const id = parseInt(req.params.id); 
+    const conn = await pool.getConnection();
+    //Delete article from MySQL and analysis from MongoDB
+    try{
+        await conn.beginTransaction();
+        await conn.query(SQL_DELETE_ARTICLE_BY_ID, [id]);
+        await mongoClient.db(MONGO_DB).collection(MONGO_COL).deleteOne({_id: id})
+        await conn.commit()
+        res.status(200).json({message: `Article and analysis id ${id} deleted.`});
+
+    } catch(e){
+        conn.rollback()
+        res.status(500).type('application/json').json({e})
+    } finally{ conn.release() }
+    
+ })
