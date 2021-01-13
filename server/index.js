@@ -10,6 +10,10 @@ require('dotenv').config();
 const fetch = require('node-fetch');
 const { MongoClient, Timestamp } = require('mongodb');
 
+// Set up Stripe
+const Stripe = require('stripe');
+const stripe = Stripe('sk_test_51I93j1EjPt3kTNjOxuiugoadj5NJV6MZfcoat4DevPnjiqyW2ICaNF5hrho6bdNBC6XdKXWeu8W0gxq2GeIv04HN004yG5Afzk');
+
 //Configure port 
 const PORT = parseInt(process.argv[2]) || parseInt(process.env.PORT) || 3000;
 
@@ -36,7 +40,7 @@ const pool = mysql2.createPool({
     user: process.env.DB_USER, 
     password: process.env.DB_PASSWORD,
     database: process.env.DB_NAME || "paf2020",
-    connectionLimit: 12,
+    connectionLimit: 100,
     timezone: "+08:00",
     host: process.env.DB_HOST || "localhost"
 
@@ -275,3 +279,38 @@ app.get('/api/history/:id', (req,res,next) => {checkToken(req,res,next)}, async 
     } finally{ conn.release() }
     
  })
+
+
+//Payment endpoint
+app.get('/success', (req, res) => {
+
+    res.status(200).type('html').send(`<h1>Success!</h1>`)
+})
+
+app.get('/failure', (req, res) => {
+
+    res.status(200).type('html').send(`<h1>Payment failed</h1>`)
+})
+
+
+ app.post('/create-checkout-session', async (req, res) => {
+    const session = await stripe.checkout.sessions.create({
+      payment_method_types: ['card'],
+      line_items: [
+        {
+          price_data: {
+            currency: 'sgd',
+            product_data: {
+              name: 'Support developer',
+            },
+            unit_amount: 1,
+          },
+          quantity: 1,
+        },
+      ],
+      mode: 'payment',
+      success_url: `${YOUR_DOMAIN}/success.html`,
+      cancel_url: `${YOUR_DOMAIN}/cancel.html`,
+    });
+    res.json({ id: session.id });
+  });
