@@ -61,7 +61,6 @@ export class MainComponent implements OnInit {
     let titleAnal = ''
     let urlAnal = ''
     let contentAnal = ''
-    console.log(article.title)
     if(!!article.title.length){
       shareText = shareText + `${article['title']}\n\n`;
       titleAnal = `Title: ${analysis['title']['score'].toFixed(5)}(${analysis['title']['decision']})\n`

@@ -24,7 +24,7 @@
 
     <!-- Url analysis -->
     <div *ngIf="isNotEmpty.domain">
-        <div class="row mb-2">
+        <div class="row ml-1 mb-2">
             <h6><strong>URL</strong></h6>
         </div>
         <div class="row mb-3">
@@ -34,7 +34,7 @@
     
     <!-- Title Analysis -->
     <div *ngIf="isNotEmpty.title">
-        <div class="row mb-2">
+        <div class="row ml-1 mb-2">
             <h6><strong>Title: </strong><em>{{analysis.title.decision}}</em></h6>
         </div>
         <div class="row mb-3">
@@ -55,7 +55,7 @@
 
     <!-- Content Analysis -->
     <div *ngIf="isNotEmpty.content">
-        <div class="row mb-2">
+        <div class="row ml-1 mb-2">
             <h6><strong>Content: </strong><em>{{analysis.content.decision}}</em></h6>
         </div>
         <div class="row mb-3">
