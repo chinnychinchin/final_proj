@@ -25,7 +25,7 @@ const TOKEN_SECRET = process.env.TOKEN_SECRET
 //SQL queries
 const SQL_FIND_USER = "select googleId from veracity_users where googleId = ?";
 const SQL_INSERT_USER = "insert into veracity_users values (?, ?)";
-const SQL_INSERT_ARTICLE = "insert into articles (url, title, content, googleId) values (?,?,?,?)";
+const SQL_INSERT_ARTICLE = "insert into articles (url, title, content, googleId, timestamp) values (?,?,?,?,?)";
 const SQL_GET_ARTICLES_BY_GOOGLEID = "select * from articles where googleId = ?";
 const SQL_DELETE_ARTICLE_BY_ID = "delete from articles where id = ?"; 
 
@@ -199,7 +199,8 @@ app.post('/api/analyze', (req,res,next) => {checkToken(req,res,next)}, async (re
     try{
         await conn.beginTransaction()
         //Insert article into MySql
-        const [sqlReturn, _] = await conn.query(SQL_INSERT_ARTICLE, [article.url, article.title, article.content, req.googleId])
+        const timestamp = new Date();
+        const [sqlReturn, _] = await conn.query(SQL_INSERT_ARTICLE, [article.url, article.title, article.content, req.googleId, timestamp])
         //Perform Analysis
         const result = await fetch('http://chinsfakebox.eastus.azurecontainer.io:8080/fakebox/check', {method: 'post', body: JSON.stringify(article), headers: { 'Content-Type': 'application/json' }})
         const resultJson = await result.json()
@@ -207,7 +208,6 @@ app.post('/api/analyze', (req,res,next) => {checkToken(req,res,next)}, async (re
         await mongoClient.db(MONGO_DB).collection(MONGO_COL).insertOne({
             _id: sqlReturn.insertId,
             analysis: resultJson,
-            timestamp: new Timestamp()
         })
         await conn.commit();
         res.status(200).json(resultJson);

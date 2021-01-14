@@ -1,1 +1,30 @@
+<!-- Nav bar -->
+<nav class="navbar navbar-light" style="background-color: #e3f2fd;">
+    <span class="navbar-brand mb-0 h1">Veracity</span>
+    <div class="navbar">
+      <div class="nav">
+        <a class="nav-item nav-link active" [routerLink]="['/main']">Analyze <span class="sr-only">(current)</span></a>
+        
+      </div>
+      <div class="nav">
+        <a class="nav-item nav-link" [routerLink]="['/history']">My history</a>
+      </div>
+      <div class="nav">
+        <a class="nav-item nav-link" [routerLink]="['/supportme']">About</a>
+      </div>
+    </div>
+</nav>
+  
+<br>
 
+<div class="jumbotron">
+    <h1 class="display-4">Introducing Veracity</h1>
+    <p class="lead">Your handy news analysis companion</p>
+    <hr class="my-4">
+    <p>Disgruntled by the proliferation of biased news from untrustworthy sources, Veracity was built to give comsumers a handy tool to perform a quick analysis on new articles before hitting the send button which sends the article along with the analysis. 
+        <br><br>
+        The algorithm categorizes news content into 2 labels; real and notreal. Notreal would include satire, opinion pieces, fake news, and everything else that wasn’t written in a purely factual way that also adhered to the AP standards. 
+        <br><br>
+        Future updates will allow users to make their own classifications like how one classifies spam mails today. <a href="https://www.ap.org/about/news-values-and-principles/" target="_blank">Learn more about AP values and princples here.</a>  
+        Thank you for your continuous support. </p>
+</div>

@@ -10,7 +10,7 @@
       <a class="nav-item nav-link" [routerLink]="['/history']">My history</a>
     </div>
     <div class="nav">
-      <a class="nav-item nav-link" [routerLink]="['/supportme']">Support</a>
+      <a class="nav-item nav-link" [routerLink]="['/supportme']">About</a>
     </div>
   </div>
 </nav>
@@ -27,7 +27,7 @@
             <a [routerLink]="['/history', a.id]" class="list-group-item list-group-item-action">
               <div class="d-flex w-100 justify-content-between">
                 <h5 class="mb-3"><strong>Title: </strong>{{a.title}}</h5> 
-                <small>3 days ago</small>
+                <small>{{a.daysElapsed}}</small>
               </div>
               <p class="mb-3"><strong>URL: </strong>{{a.url}}</p>
               <p class="mb-1"><strong>Content: </strong>{{a.content}}</p>

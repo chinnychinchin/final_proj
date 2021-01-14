@@ -15,16 +15,23 @@ export class HistoryComponent implements OnInit {
 
   ngOnInit(): void {
 
-    this.authSvc.getArticlesHistory().then(result => {this.articles = result}).catch(err => {console.log(err)})
+    this.authSvc.getArticlesHistory()
+      .then(result => {
+        //@ts-ignore
+        this.articles = result.map(a => {
+          
+          const daysElapsed =  this.getDaysElapsed(a.timestamp)
+          if(daysElapsed == 0) {a.daysElapsed = "Today"}
+          else if(daysElapsed == 1) {a.daysElapsed = "Yesterday"}
+          else {a.daysElapsed = `${daysElapsed} days ago`}
+          return a
+        
+        })
+        console.log(this.articles)
+      }).catch(err => {console.log(err)})
     
   }
 
-  // ngOnChanges(changes: SimpleChanges): void {
-  //   //Called before any other lifecycle hook. Use it to inject dependencies, but avoid any serious work here.
-  //   //Add '${implements OnChanges}' to the class.
-  //   this.authSvc.getArticlesHistory().then(result => {console.log(result); this.articles = result}).catch(err => {console.log(err)})
-
-  // }
 
   async onDelete(id) {
 
@@ -32,6 +39,14 @@ export class HistoryComponent implements OnInit {
     const result = await this.authSvc.getArticlesHistory();
     console.log(`${id} deleted`)
     this.articles = result;
+  }
+
+  getDaysElapsed(dateString: string) {
+    const now = new Date ();
+    const date = new Date(dateString)
+    const millisecondsElapsed = now.getTime() - date.getTime();
+    const daysElapsed = Math.floor(millisecondsElapsed/(1000*60*60*24))
+    return daysElapsed
   }
 
 }
