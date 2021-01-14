@@ -12,7 +12,7 @@ export class AuthService implements CanActivate {
         //reset token (if any)
         this.token = '';
       
-        window.open('http://localhost:3000/auth/google',"mywindow","location=1,status=1,scrollbars=1, width=800,height=800");
+        window.open('/auth/google',"mywindow","location=1,status=1,scrollbars=1, width=800,height=800");
         window.addEventListener('message', (message) => {
             //message will contain google user and details
             try{ localStorage.setItem('jwt',message.data.token) }
@@ -33,7 +33,7 @@ export class AuthService implements CanActivate {
     }
 
     isLogin() {
-        
+
         const token = this.getToken()
         return token != ''
     }
@@ -41,7 +41,7 @@ export class AuthService implements CanActivate {
     analyzeArticle(article){
 
         const headers = new HttpHeaders({"Authorization": this.getToken()});
-        return this.http.post("http://localhost:3000/api/analyze", article, {headers, observe:'response'}).toPromise();
+        return this.http.post("/api/analyze", article, {headers, observe:'response'}).toPromise();
 
     }
 
@@ -49,7 +49,7 @@ export class AuthService implements CanActivate {
     getArticlesHistory(){
 
         const headers = new HttpHeaders({"Authorization": this.getToken()});
-        return this.http.get("http://localhost:3000/api/history", {headers}).toPromise()
+        return this.http.get("/api/history", {headers}).toPromise()
 
     }
 
@@ -57,14 +57,14 @@ export class AuthService implements CanActivate {
     getAnalysisHistory(id){
         
         const headers = new HttpHeaders({"Authorization": this.getToken()});
-        return this.http.get(`http://localhost:3000/api/history/${id}`, {headers}).toPromise()
+        return this.http.get(`/api/history/${id}`, {headers}).toPromise()
 
     }
 
     deleteArticle(id){
 
         const headers = new HttpHeaders({"Authorization": this.getToken()});
-        return this.http.delete(`http://localhost:3000/api/history/${id}`, {headers}).toPromise();
+        return this.http.delete(`/api/history/${id}`, {headers}).toPromise();
 
     }
 

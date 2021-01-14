@@ -185,12 +185,6 @@ app.get('/auth/google/callback', passport.authenticate('google'), (req,res) => {
 
 });
 
-app.get('/main', (req, res) => {
-
-    res.status(200).type('application/json').json({"page": "main page"})
-
-})
-
 //Analyze article + store analysis in MongoDb
 app.post('/api/analyze', (req,res,next) => {checkToken(req,res,next)}, async (req, res) => {
 

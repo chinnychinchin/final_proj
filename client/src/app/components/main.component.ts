@@ -45,8 +45,7 @@ export class MainComponent implements OnInit {
       const {body} = await this.authSvc.analyzeArticle(article) 
       this.checkIfEmpty(body);
       this.analysis = body
-      console.log(this.analysis)
-
+    
     } 
     catch(err){ if(err.status == 403){this.router.navigate(['/'])} }
   }

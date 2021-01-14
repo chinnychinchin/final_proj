@@ -22,7 +22,7 @@ const ROUTES: Routes = [
   {path: 'history', component: HistoryComponent, canActivate: [AuthService]},
   {path: 'history/:id', component: AnalHistComponent, canActivate: [AuthService]},
   {path: 'supportme', component: SupportmeComponent, canActivate: [AuthService]},
-  {path: '**', redirectTo: '/main', pathMatch: 'full'}
+  {path: '**', redirectTo: '/', pathMatch: 'full'}
 
 ]
 

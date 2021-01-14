@@ -1,1 +1,75 @@
-<p>anal-hist works!</p>
+<!-- Nav bar -->
+<nav class="navbar navbar-light" style="background-color: #e3f2fd;">
+    <span class="navbar-brand mb-0 h1">Veracity</span>
+    <div class="navbar">
+      <div class="nav">
+        <a class="nav-item nav-link active" [routerLink]="['/main']">Analyze <span class="sr-only">(current)</span></a>
+        
+      </div>
+      <div class="nav">
+        <a class="nav-item nav-link" [routerLink]="['/history']">My history</a>
+      </div>
+      <div class="nav">
+        <a class="nav-item nav-link" [routerLink]="['/supportme']">About</a>
+      </div>
+    </div>
+  </nav>
+  
+  <br>
+
+<!-- Analysis -->
+
+<div *ngIf="analysis != null">
+    <h4 class="mb-3">Analysis</h4>
+
+    <!-- Url analysis -->
+    <div *ngIf="isNotEmpty.domain">
+        <div class="row mb-2">
+            <h6><strong>URL</strong></h6>
+        </div>
+        <div class="row mb-3">
+            <div class="col">Category: <em>{{analysis.domain.category}}</em></div>
+        </div>
+    </div>
+    
+    <!-- Title Analysis -->
+    <div *ngIf="isNotEmpty.title">
+        <div class="row mb-2">
+            <h6><strong>Title: </strong><em>{{analysis.title.decision}}</em></h6>
+        </div>
+        <div class="row mb-3">
+            <div class="col-3">
+                <h6>0 (Biased)</h6>
+            </div>
+            <div class="col-6">
+                <div class="progress">
+                    <div class="progress-bar bg-success" role="progressbar" [style.width.%]="analysis['title']['score']*100" [aria-valuenow]="analysis['title']['score']" aria-valuemin="0" aria-valuemax="1">{{analysis['title']['score'].toFixed(5)}}</div>
+                </div>
+            </div>
+            <div class="col-3">
+                <h6>1 (Impartial)</h6>
+            </div>
+        </div>  
+    </div>
+    
+
+    <!-- Content Analysis -->
+    <div *ngIf="isNotEmpty.content">
+        <div class="row mb-2">
+            <h6><strong>Content: </strong><em>{{analysis.content.decision}}</em></h6>
+        </div>
+        <div class="row mb-3">
+            <div class="col-3">
+                <h6>0 (Biased)</h6>
+            </div>
+            <div class="col-6">
+                <div class="progress">
+                    <div class="progress-bar bg-danger" role="progressbar" [style.width.%]="analysis['content']['score']*100" [aria-valuenow]="analysis['content']['score']" aria-valuemin="0" aria-valuemax="1">{{analysis['content']['score'].toFixed(5)}}</div>
+                </div>
+            </div>
+            <div class="col-3">
+                <h6>1 (Impartial)</h6>
+            </div>
+        </div>
+    </div>
+
