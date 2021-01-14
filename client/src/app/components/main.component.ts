@@ -2,6 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup } from '@angular/forms';
 import { AuthService } from '../auth.service';
 import { NgNavigatorShareService } from 'ng-navigator-share';
+import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-main',
@@ -15,7 +16,7 @@ export class MainComponent implements OnInit {
   isNotEmpty = {domain: true, title: true, content: true}
   canShare = false
 
-  constructor(private fb: FormBuilder, private authSvc: AuthService, private webshare: NgNavigatorShareService) { }
+  constructor(private fb: FormBuilder, private authSvc: AuthService, private webshare: NgNavigatorShareService, private router: Router) { }
 
   ngOnInit(): void {
 
@@ -38,12 +39,16 @@ export class MainComponent implements OnInit {
 
   async onAnalyzeClick() {
 
-    const article = this.newsArticleForm.value
-    const {body} = await this.authSvc.analyzeArticle(article)
-    this.checkIfEmpty(body);
-    this.analysis = body
-    console.log(this.analysis)
+    const article = this.newsArticleForm.value;
+    try{ 
+      
+      const {body} = await this.authSvc.analyzeArticle(article) 
+      this.checkIfEmpty(body);
+      this.analysis = body
+      console.log(this.analysis)
 
+    } 
+    catch(err){ if(err.status == 403){this.router.navigate(['/'])} }
   }
 
   onResetClick() {

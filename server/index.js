@@ -172,7 +172,7 @@ app.get('/auth/google/callback', passport.authenticate('google'), (req,res) => {
         iss: 'chins',
         iat: issuedTimeInSeconds,
         nbf: issuedTimeInSeconds,
-        exp: issuedTimeInSeconds + (60*60)  //token expires 30s after being issued
+        exp: issuedTimeInSeconds + (60*60)  //token expires 1 hour: 60 x 60s (60*60) after being issued
 
     }, TOKEN_SECRET)
     let responseHTML = '<html><head><title>Main</title></head><body></body><script>res = %value%; window.opener.postMessage(res, "*");window.close();</script></html>'

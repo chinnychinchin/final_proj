@@ -19,7 +19,7 @@ export class HistoryComponent implements OnInit {
       .then(result => {
         //@ts-ignore
         this.articles = result.map(a => {
-          
+
           const daysElapsed =  this.getDaysElapsed(a.timestamp)
           if(daysElapsed == 0) {a.daysElapsed = "Today"}
           else if(daysElapsed == 1) {a.daysElapsed = "Yesterday"}
@@ -27,8 +27,8 @@ export class HistoryComponent implements OnInit {
           return a
         
         })
-        console.log(this.articles)
-      }).catch(err => {console.log(err)})
+        
+      }).catch(err => {console.log(err); if(err.status == 403){this.router.navigate(['/'])}})
     
   }
 

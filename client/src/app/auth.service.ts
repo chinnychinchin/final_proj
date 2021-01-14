@@ -15,8 +15,9 @@ export class AuthService implements CanActivate {
         window.open('http://localhost:3000/auth/google',"mywindow","location=1,status=1,scrollbars=1, width=800,height=800");
         window.addEventListener('message', (message) => {
             //message will contain google user and details
-            this.token = message.data.token
-            if(this.token != ''){
+            try{ localStorage.setItem('jwt',message.data.token) }
+            catch { this.token = message.data.token }
+            if(this.getToken() != ''){
                 //console.log(this.token)
                 this.router.navigate(['/main'])
             }  
@@ -24,13 +25,22 @@ export class AuthService implements CanActivate {
         
     }
 
+    getToken() {
+
+        const token = localStorage.getItem('jwt');
+        if(token != null) {return token}
+        else{ return this.token }
+    }
+
     isLogin() {
-        return this.token != ''
+        
+        const token = this.getToken()
+        return token != ''
     }
 
     analyzeArticle(article){
 
-        const headers = new HttpHeaders({"Authorization": this.token});
+        const headers = new HttpHeaders({"Authorization": this.getToken()});
         return this.http.post("http://localhost:3000/api/analyze", article, {headers, observe:'response'}).toPromise();
 
     }
@@ -38,7 +48,7 @@ export class AuthService implements CanActivate {
 
     getArticlesHistory(){
 
-        const headers = new HttpHeaders({"Authorization": this.token});
+        const headers = new HttpHeaders({"Authorization": this.getToken()});
         return this.http.get("http://localhost:3000/api/history", {headers}).toPromise()
 
     }
@@ -46,14 +56,14 @@ export class AuthService implements CanActivate {
 
     getAnalysisHistory(id){
         
-        const headers = new HttpHeaders({"Authorization": this.token});
+        const headers = new HttpHeaders({"Authorization": this.getToken()});
         return this.http.get(`http://localhost:3000/api/history/${id}`, {headers}).toPromise()
 
     }
 
     deleteArticle(id){
 
-        const headers = new HttpHeaders({"Authorization": this.token});
+        const headers = new HttpHeaders({"Authorization": this.getToken()});
         return this.http.delete(`http://localhost:3000/api/history/${id}`, {headers}).toPromise();
 
     }
