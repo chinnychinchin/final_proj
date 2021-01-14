@@ -154,6 +154,7 @@ const checkToken = (req, res, next) => {
 }
 
 //Configure routes 
+app.use('/', express.static(__dirname+'/public/dist/client'))
 
 //login route
 app.get('/auth/google',
