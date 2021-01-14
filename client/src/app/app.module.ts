@@ -4,6 +4,7 @@ import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { HttpClientModule } from '@angular/common/http';
 import { RouterModule, Routes } from '@angular/router';
 import { AngularSvgIconModule } from 'angular-svg-icon';
+import { FlexLayoutModule } from '@angular/flex-layout'
 
 import { AuthService } from './auth.service';
 
@@ -43,7 +44,8 @@ const ROUTES: Routes = [
     RouterModule.forRoot(ROUTES,  {
       onSameUrlNavigation: 'reload'
     }),
-    AngularSvgIconModule.forRoot()
+    AngularSvgIconModule.forRoot(),
+    FlexLayoutModule
   ],
   providers: [AuthService],
   bootstrap: [AppComponent]

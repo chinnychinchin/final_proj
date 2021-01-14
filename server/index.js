@@ -18,6 +18,7 @@ const PORT = parseInt(process.argv[2]) || parseInt(process.env.PORT) || 3000;
 const mongoPassword = process.env.MONGO_DB_PASSWORD
 const MONGO_DB = 'veracity';
 const MONGO_COL = 'analyses';
+const MONGO_COL_LOGINS = 'logins';
 const MONGO_URL = `mongodb+srv://veracity_admin:${mongoPassword}@veracity-app-cluster.15dnu.mongodb.net/${MONGO_DB}?retryWrites=true&w=majority`;
 const mongoClient = new MongoClient(MONGO_URL, {useNewUrlParser: true, useUnifiedTopology: true});
 
@@ -71,7 +72,6 @@ passport.use(new GoogleStrategy({
   },
   async (request, accessToken, refreshToken, profile, done) => {
     //perform authentication
-    console.log(`Profile: `, profile)
     const conn = await pool.getConnection();
     try{
         const [authResult,_] = await conn.query(SQL_FIND_USER, [profile.id])
@@ -123,7 +123,6 @@ passport.deserializeUser(async (id, done) => {
     const conn = await pool.getConnection();
     try{
         const [user,_] = await conn.query(SQL_FIND_USER, [id]);
-        console.log(user)
         done(null,user)
     }
     catch(e){
@@ -145,7 +144,6 @@ const checkToken = (req, res, next) => {
         //verify token
         const verified = jwt.verify(token, TOKEN_SECRET);
         req.googleId = verified.sub;
-        //console.info(`Verified token: `, verified);
         next();
     } catch(e) {
         res.status(403).json({message: 'Incorrect token', e})
@@ -176,13 +174,14 @@ app.get('/auth/google/callback', passport.authenticate('google'), (req,res) => {
         exp: issuedTimeInSeconds + (60*60)  //token expires 1 hour: 60 x 60s (60*60) after being issued
 
     }, TOKEN_SECRET)
+    //Store the JWTs
+    mongoClient.db(MONGO_DB).collection(MONGO_COL_LOGINS).insertOne({token})
     let responseHTML = '<html><head><title>Main</title></head><body></body><script>res = %value%; window.opener.postMessage(res, "*");window.close();</script></html>'
     responseHTML = responseHTML.replace('%value%', JSON.stringify({
         user: req.user,
         token
     }))
     res.status(200).send(responseHTML);
-    //res.status(200).type('application/json').json({"message": "User logged in", token})
 
 });
 
@@ -190,7 +189,6 @@ app.get('/auth/google/callback', passport.authenticate('google'), (req,res) => {
 app.post('/api/analyze', (req,res,next) => {checkToken(req,res,next)}, async (req, res) => {
 
     const article = req.body;
-    console.log(article)
     const conn = await pool.getConnection();
     //post to fakebox end point and upload results to mongo
     try{

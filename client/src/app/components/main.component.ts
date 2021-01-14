@@ -12,6 +12,7 @@ import { Router } from '@angular/router';
 export class MainComponent implements OnInit {
 
   newsArticleForm: FormGroup
+  article
   analysis
   isNotEmpty = {domain: true, title: true, content: true}
   canShare = false
@@ -39,10 +40,10 @@ export class MainComponent implements OnInit {
 
   async onAnalyzeClick() {
 
-    const article = this.newsArticleForm.value;
+    this.article = this.newsArticleForm.value;
     try{ 
       
-      const {body} = await this.authSvc.analyzeArticle(article) 
+      const {body} = await this.authSvc.analyzeArticle(this.article) 
       this.checkIfEmpty(body);
       this.analysis = body
     
@@ -54,12 +55,35 @@ export class MainComponent implements OnInit {
     this.newsArticleForm.reset()
   }
 
+  //function to make the text to be shared
+  mkShareTxt(article, analysis) {
+    let shareText = ''
+    let titleAnal = ''
+    let urlAnal = ''
+    let contentAnal = ''
+    console.log(article.title)
+    if(!!article.title.length){
+      shareText = shareText + `${article['title']}\n\n`;
+      titleAnal = `Title: ${analysis['title']['score'].toFixed(5)}(${analysis['title']['decision']})\n`
+    }
+    if(!!article.content.length){
+      shareText = shareText + `${article['content']}\n\n`
+      contentAnal = `Content: ${analysis['content']['score'].toFixed(5)}(${analysis['content']['decision']})`
+    }
+    if(!!article.url.length){
+      shareText = shareText + `${article['url']}\n\n`
+      urlAnal = `Domain: ${this.analysis['domain']['category']}\n`
+    }
+  
+    return shareText + `(Analysis by Veracity: \n${urlAnal}${titleAnal}${contentAnal})`
+  }
+
   share() {
     const article = this.newsArticleForm.value;
-    console.log(article)
+    const shareText = this.mkShareTxt(article,this.analysis)
     this.webshare.share({
       title: 'My Article',
-      text: `${article['title']}\n\n${article['content']}\n\n${article['url']}\n\n(Analysis by Veracity: \nDomain: ${this.analysis['domain']['category']}, \nTitle: ${this.analysis['title']['score'].toFixed(5)}(${this.analysis['title']['decision']}), \nContent: ${this.analysis['content']['score'].toFixed(5)}(${this.analysis['content']['decision']}))`,
+      text: shareText
 
     }).then((resp) => {console.log(resp)}).catch(e => {console.log(e)} )
   }
