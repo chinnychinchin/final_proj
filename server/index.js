@@ -9,15 +9,17 @@ const mysql2 = require('mysql2/promise');
 require('dotenv').config();
 const fetch = require('node-fetch');
 const { MongoClient, Timestamp } = require('mongodb');
+const fs = require('fs')
 
 //Configure port 
 const PORT = parseInt(process.argv[2]) || parseInt(process.env.PORT) || 3000;
 
 //Configure Mongodb
-const MONGO_URL = "mongodb://localhost:27017";
-const mongoClient = new MongoClient(MONGO_URL, {useNewUrlParser: true, useUnifiedTopology: true});
+const mongoPassword = process.env.MONGO_DB_PASSWORD
 const MONGO_DB = 'veracity';
 const MONGO_COL = 'analyses';
+const MONGO_URL = `mongodb+srv://veracity_admin:${mongoPassword}@veracity-app-cluster.15dnu.mongodb.net/${MONGO_DB}?retryWrites=true&w=majority`;
+const mongoClient = new MongoClient(MONGO_URL, {useNewUrlParser: true, useUnifiedTopology: true});
 
 //Jwt password
 const TOKEN_SECRET = process.env.TOKEN_SECRET
